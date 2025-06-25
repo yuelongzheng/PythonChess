@@ -31,26 +31,46 @@ def main():
     gs = ChessEngine.GameState()
     load_images()
     running = True
-    
+    square_selected = () # No square is selected, keep track of the last click of the user (tuple : (row, col))
+    player_clicks = [] # Keep track of player clicks
     while running: 
         for e in p.event.get():
             if e.type == p.QUIT:
                 running = False
-        drawGameState(screen, gs)
+            elif e.type == p.MOUSEBUTTONDOWN:
+                location = p.mouse.get_pos() # (x,y) location of mouse
+                col = location[0] // SQUARE_SIZE
+                row = location[1] // SQUARE_SIZE
+                print(row,col,gs.board[row][col])
+                if square_selected == (row, col):
+                    square_selected = () # deselect
+                    player_clicks = [] # clear player clicks
+                else:
+                    square_selected = (row, col)
+                    player_clicks.append(square_selected)
+                if len(player_clicks) == 2:
+                    move = ChessEngine.Move(player_clicks[0], player_clicks[1], gs.board)
+                    # print(move.get_chess_notation())
+                    gs.make_move(move)
+                    # print(gs.board)
+                    square_selected = ()
+                    player_clicks = []
+
+        draw_game_state(screen, gs)
         clock.tick(MAX_FPS)
         p.display.flip()
 
 '''
 Draws all graphics in game state
 '''
-def drawGameState(screen, gs):
-    drawBoard(screen)
-    drawPieces(screen, gs.board)
+def draw_game_state(screen, gs):
+    draw_board(screen)
+    draw_pieces(screen, gs.board)
 
 '''
 Draw the square on the board
 '''
-def drawBoard(screen):
+def draw_board(screen):
     colours = [p.Color("white"), p.Color("gray")]
     for r in range(DIMENSION):
         for c in range(DIMENSION):
@@ -60,7 +80,7 @@ def drawBoard(screen):
 '''
 Draw the pieces onto the board using GameState.board
 '''
-def drawPieces(screen, board):
+def draw_pieces(screen, board):
     for r in range(DIMENSION):
         for c in range(DIMENSION):
             piece = board[r][c]
