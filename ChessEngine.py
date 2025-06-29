@@ -19,6 +19,7 @@ class GameState():
             ["wp", "wp", "wp", "wp", "wp", "wp", "wp", "wp"],
             ["wR", "wN", "wB", "wQ", "wK", "wB", "wN", "wR"]
         ]
+        self.length = len(self.board)
         self.move_functions = {'p' : self.get_pawn_moves, 'R' : self.get_rook_moves,
                                'N' : self.get_knight_moves, 'B' : self.get_bishop_moves,
                                'Q' : self.get_queen_moves, 'K' : self.get_king_moves}
@@ -59,7 +60,7 @@ class GameState():
     
     def get_pawn_moves(self, r, c, moves):
         start_index = 0
-        end_index = len(self.board) - 1
+        end_index = self.length - 1
         if self.white_to_move:
             if r - 1 >= start_index:
                 if self.board[r - 1][c] == "--": # make sure square above is clear
@@ -88,12 +89,11 @@ class GameState():
     def get_rook_moves(self, r, c, moves):
         directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
         enemy_colour = 'b' if self.white_to_move else 'w'
-        length = len(self.board)
-        for d in directions:
-            for i in range(1,length):
-                end_row = r + i*d[0]
-                end_col = c + i*d[1]
-                if 0 <= end_row < length and 0 <= end_col < length:
+        for direction in directions:
+            for i in range(1,self.length):
+                end_row = r + i*direction[0]
+                end_col = c + i*direction[1]
+                if 0 <= end_row < self.length and 0 <= end_col < self.length:
                     end_piece = self.board[end_row][end_col]
                     if end_piece == "--": # empty square
                         moves.append(Move((r,c), (end_row, end_col), self.board))
@@ -107,20 +107,59 @@ class GameState():
 
     
     def get_knight_moves(self, r, c, moves):
-        pass
+        enemy_colour = 'b' if self.white_to_move else 'w'
+        for i in range(1,3,1):
+            j = 3 - i
+            directions = ((i,j), (i, -j), (-i, j), (-i, -j))
+            for direction in directions:
+                end_row = r + direction[0]
+                end_col = c + direction[1]
+                if 0 <= end_row < self.length and 0 <= end_col < self.length:
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--" or end_piece[0] == enemy_colour:
+                        moves.append(Move((r, c), (end_row, end_col), self.board))
     
     def get_bishop_moves(self, r, c, moves):
-        pass
+        directions = ((-1, -1), (1, -1), (1, 1), (-1, 1))
+        enemy_colour = 'b' if self.white_to_move else 'w'
+        for direction in directions:
+            for i in range(1,self.length):
+                end_row = r + i*direction[0]
+                end_col = c + i*direction[1]
+                if 0 <= end_row < self.length and 0 <= end_col < self.length:
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--": # empty square
+                        moves.append(Move((r,c), (end_row, end_col), self.board))
+                    elif end_piece[0] == enemy_colour: # opposing chess piece 
+                        moves.append(Move((r,c), (end_row, end_col), self.board))
+                        break
+                    else : # friendly chess piece
+                        break
+                else:
+                    break
     
     def get_queen_moves(self, r, c, moves):
-        pass
+        self.get_rook_moves(r, c, moves)
+        self.get_bishop_moves(r, c, moves)
 
     def get_king_moves(self, r, c, moves):
-        pass
-
-                
-
-
+        directions = ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, -1), (1, 1), (-1, 1))
+        enemy_colour = 'b' if self.white_to_move else 'w'
+        for direction in directions:
+            end_row = r + direction[0]
+            end_col = c + direction[1]
+            if 0 <= end_row < self.length and 0 <= end_col < self.length:
+                end_piece = self.board[end_row][end_col]
+                if end_piece == "--": # empty square
+                    moves.append(Move((r,c), (end_row, end_col), self.board))
+                elif end_piece[0] == enemy_colour: # opposing chess piece 
+                    moves.append(Move((r,c), (end_row, end_col), self.board))
+                    break
+                else : # friendly chess piece
+                    break
+            else:
+                break
+            
 class Move():
     ranks_to_rows = {}
     for i in range(1,9,1):
