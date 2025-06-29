@@ -66,6 +66,8 @@ def main():
 
         if move_made:
             valid_moves = gs.get_valid_moves()
+            for move in valid_moves:
+                print(move)
             move_made = False
             
         draw_game_state(screen, gs)

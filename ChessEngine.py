@@ -48,7 +48,7 @@ class GameState():
     All moves regardless of checkmates
     '''
     def get_all_possible_moves(self):
-        moves = [Move((6,4), (4,4), self.board)]
+        moves = []
         for r in range(len(self.board)):
             for c in range(len(self.board[r])):
                 turn = self.board[r][c][0]
@@ -61,30 +61,65 @@ class GameState():
         start_index = 0
         end_index = len(self.board) - 1
         if self.white_to_move:
-            if r - 1 >= start_index and self.board[r - 1][c] == "--": # make sure square above is clear
-                moves.append(Move((r, c), (r - 1, c), self.board))
-                if r == end_index - 1 and self.board[r - 2][c] == "--": # initial pawn 2 square move
-                    moves.append(Move((r, c), (r - 2, c), self.board))
-            if c - 1 >= start_index:
-                if r - 1 >= start_index and self.board[r - 1][c - 1][0] == 'b':
-                    moves.append(Move((r, c), (r - 1, c - 1), self.board))
-            if c + 1 <= end_index:
-                if r - 1 >= start_index and self.board[r - 1][c + 1][0] == 'b':
-                    moves.append(Move((r,c), (r - 1, c + 1), self.board))
+            if r - 1 >= start_index:
+                if self.board[r - 1][c] == "--": # make sure square above is clear
+                    moves.append(Move((r, c), (r - 1, c), self.board))
+                    if r == end_index - 1 and self.board[r - 2][c] == "--": # initial pawn 2 square move
+                        moves.append(Move((r, c), (r - 2, c), self.board))
+                if c - 1 >= start_index:
+                    if self.board[r - 1][c - 1][0] == 'b':
+                        moves.append(Move((r, c), (r - 1, c - 1), self.board))
+                if c + 1 <= end_index:
+                    if self.board[r - 1][c + 1][0] == 'b':
+                        moves.append(Move((r,c), (r - 1, c + 1), self.board))
         else:
-            if r + 1 <= end_index and self.board[r + 1][c] == "--": # make sure square below is clear
-                moves.append(Move((r, c), (r + 1, c), self.board))
-                if r == start_index + 1 and self.board[r + 2][c] == "--": # initial pawn 2 square move
-                    moves.append(Move((r, c), (r + 2, c), self.board))
-            if c - 1 >= start_index:
-                if r + 1 <= end_index and self.board[r+1][c-1][0] == 'w':
-                    moves.append(Move((r, c), (r + 1, c - 1), self.board))
-            if c + 1 <= end_index:
-                if r + 1 <= end_index and self.board[r+1][c+1][0] == 'w':
-                    moves.append(Move((r, c), (r + 1, c + 1), self.board))
+            if r + 1 <= end_index:
+                if self.board[r + 1][c] == "--": # make sure square below is clear
+                    moves.append(Move((r, c), (r + 1, c), self.board))
+                    if r == start_index + 1 and self.board[r + 2][c] == "--": # initial pawn 2 square move
+                        moves.append(Move((r, c), (r + 2, c), self.board))
+                if c - 1 >= start_index:
+                    if self.board[r+1][c-1][0] == 'w':
+                        moves.append(Move((r, c), (r + 1, c - 1), self.board))
+                if c + 1 <= end_index:
+                    if self.board[r+1][c+1][0] == 'w':
+                        moves.append(Move((r, c), (r + 1, c + 1), self.board))
     
     def get_rook_moves(self, r, c, moves):
-        pass
+        row = r
+        col = c
+        start_index = 0
+        end_index = len(self.board) - 1
+        while row + 1 <= end_index and self.board[row + 1][c] == "--":
+            moves.append(Move((r, c), (row + 1, c), self.board))
+            row += 1
+        if row + 1 <= end_index and self.board[row + 1][c][0] == 'b' and self.white_to_move:
+            moves.append(Move((r, c), (row + 1, c), self.board))
+        if row + 1 <= end_index and self.board[row + 1][c][0] == 'w' and not self.white_to_move:
+            moves.append(Move((r, c), (row + 1, c), self.board))
+        row = r
+        while row - 1 >= start_index and self.board[row - 1][c] == "--":
+            moves.append(Move((r,c), (row - 1, c), self.board))
+            row -= 1
+        if row - 1 >= start_index and self.board[row - 1][c][0] == 'b' and self.white_to_move:
+            moves.append(Move((r, c), (row - 1, c), self.board))
+        if row - 1 >= start_index and self.board[row - 1][c][0] == 'w' and not self.white_to_move:
+            moves.append(Move((r, c), (row - 1, c), self.board))
+        while col + 1 <= end_index and self.board[r][col + 1] == "--":
+            moves.append(Move((r, c), (r, col + 1), self.board))
+            col += 1
+        if col + 1 <= end_index and self.board[r][col + 1][0] == 'b' and self.white_to_move:
+            moves.append(Move((r, c), (r, col + 1), self.board))
+        if col + 1 <= end_index and self.board[r][col + 1][0] == 'w' and not self.white_to_move:
+            moves.append(Move((r, c), (r, col + 1), self.board))
+        col = c
+        while col - 1 >= 0 and self.board[r][col - 1] == "--":
+            moves.append(Move((r, c), (r, col - 1), self.board))
+            col -= 1
+        if col - 1 >= start_index and self.board[r][col - 1][0] == 'b' and self.white_to_move:
+            moves.append(Move((r, c), (r, col - 1), self.board))
+        if col - 1 >= start_index and self.board[r][col - 1][0] == 'w' and not self.white_to_move:
+            moves.append(Move((r, c), (r, col - 1), self.board))
     
     def get_knight_moves(self, r, c, moves):
         pass
@@ -129,6 +164,9 @@ class Move():
             return self.moveID == other.moveID
         return False
     
+    def __str__(self):
+        return ' '.join([str(self.start_row), str(self.start_col), str(self.end_row), str(self.end_col)])
+
     def get_chess_notation(self):
         return self.get_rank_file(self.start_row, self.start_col) + self.get_rank_file(self.end_row, self.end_col)
     
