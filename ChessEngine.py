@@ -60,21 +60,22 @@ class GameState():
     
     def get_pawn_moves(self, r, c, moves):
         start_index = 0
-        end_index = self.length - 1
+        no_rows = len(self.board)
+        no_cols = len(self.board[0])
         if self.white_to_move:
             if r - 1 >= start_index:
                 if self.board[r - 1][c] == "--": # make sure square above is clear
                     moves.append(Move((r, c), (r - 1, c), self.board))
-                    if r == end_index - 1 and self.board[r - 2][c] == "--": # initial pawn 2 square move
+                    if r == no_rows - 2 and self.board[r - 2][c] == "--": # initial pawn 2 square move
                         moves.append(Move((r, c), (r - 2, c), self.board))
                 if c - 1 >= start_index:
                     if self.board[r - 1][c - 1][0] == 'b':
                         moves.append(Move((r, c), (r - 1, c - 1), self.board))
-                if c + 1 <= end_index:
+                if c + 1 < no_cols:
                     if self.board[r - 1][c + 1][0] == 'b':
                         moves.append(Move((r,c), (r - 1, c + 1), self.board))
         else:
-            if r + 1 <= end_index:
+            if r + 1 < no_rows:
                 if self.board[r + 1][c] == "--": # make sure square below is clear
                     moves.append(Move((r, c), (r + 1, c), self.board))
                     if r == start_index + 1 and self.board[r + 2][c] == "--": # initial pawn 2 square move
@@ -82,7 +83,7 @@ class GameState():
                 if c - 1 >= start_index:
                     if self.board[r+1][c-1][0] == 'w':
                         moves.append(Move((r, c), (r + 1, c - 1), self.board))
-                if c + 1 <= end_index:
+                if c + 1 < no_cols:
                     if self.board[r+1][c+1][0] == 'w':
                         moves.append(Move((r, c), (r + 1, c + 1), self.board))
     
