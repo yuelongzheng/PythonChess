@@ -86,40 +86,25 @@ class GameState():
                         moves.append(Move((r, c), (r + 1, c + 1), self.board))
     
     def get_rook_moves(self, r, c, moves):
-        row = r
-        col = c
-        start_index = 0
-        end_index = len(self.board) - 1
-        while row + 1 <= end_index and self.board[row + 1][c] == "--":
-            moves.append(Move((r, c), (row + 1, c), self.board))
-            row += 1
-        if row + 1 <= end_index and self.board[row + 1][c][0] == 'b' and self.white_to_move:
-            moves.append(Move((r, c), (row + 1, c), self.board))
-        if row + 1 <= end_index and self.board[row + 1][c][0] == 'w' and not self.white_to_move:
-            moves.append(Move((r, c), (row + 1, c), self.board))
-        row = r
-        while row - 1 >= start_index and self.board[row - 1][c] == "--":
-            moves.append(Move((r,c), (row - 1, c), self.board))
-            row -= 1
-        if row - 1 >= start_index and self.board[row - 1][c][0] == 'b' and self.white_to_move:
-            moves.append(Move((r, c), (row - 1, c), self.board))
-        if row - 1 >= start_index and self.board[row - 1][c][0] == 'w' and not self.white_to_move:
-            moves.append(Move((r, c), (row - 1, c), self.board))
-        while col + 1 <= end_index and self.board[r][col + 1] == "--":
-            moves.append(Move((r, c), (r, col + 1), self.board))
-            col += 1
-        if col + 1 <= end_index and self.board[r][col + 1][0] == 'b' and self.white_to_move:
-            moves.append(Move((r, c), (r, col + 1), self.board))
-        if col + 1 <= end_index and self.board[r][col + 1][0] == 'w' and not self.white_to_move:
-            moves.append(Move((r, c), (r, col + 1), self.board))
-        col = c
-        while col - 1 >= 0 and self.board[r][col - 1] == "--":
-            moves.append(Move((r, c), (r, col - 1), self.board))
-            col -= 1
-        if col - 1 >= start_index and self.board[r][col - 1][0] == 'b' and self.white_to_move:
-            moves.append(Move((r, c), (r, col - 1), self.board))
-        if col - 1 >= start_index and self.board[r][col - 1][0] == 'w' and not self.white_to_move:
-            moves.append(Move((r, c), (r, col - 1), self.board))
+        directions = ((-1, 0), (1, 0), (0, -1), (0, 1))
+        enemy_colour = 'b' if self.white_to_move else 'w'
+        length = len(self.board)
+        for d in directions:
+            for i in range(1,length):
+                end_row = r + i*d[0]
+                end_col = c + i*d[1]
+                if 0 <= end_row < length and 0 <= end_col < length:
+                    end_piece = self.board[end_row][end_col]
+                    if end_piece == "--": # empty square
+                        moves.append(Move((r,c), (end_row, end_col), self.board))
+                    elif end_piece[0] == enemy_colour: # opposing chess piece 
+                        moves.append(Move((r,c), (end_row, end_col), self.board))
+                        break
+                    else : # friendly chess piece
+                        break
+                else:
+                    break
+
     
     def get_knight_moves(self, r, c, moves):
         pass
