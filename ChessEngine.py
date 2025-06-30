@@ -22,7 +22,8 @@ class GameState():
         self.length = len(self.board)
         self.move_functions = {'p' : self.get_pawn_moves, 'R' : self.get_rook_moves,
                                'N' : self.get_knight_moves, 'B' : self.get_bishop_moves,
-                               'Q' : self.get_queen_moves, 'K' : self.get_king_moves}
+                               'Q' : self.get_queen_moves, 'K' : self.get_king_moves,
+                               'D' : self.get_dummy_moves}
         self.white_to_move = True
         self.move_log = []
     
@@ -160,6 +161,10 @@ class GameState():
                     break
             else:
                 break
+    
+    # Create a dummy piece for testing purposes
+    def get_dummy_moves(self, r, c, moves):
+        pass
             
 class Move():
     ranks_to_rows = {}

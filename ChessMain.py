@@ -57,8 +57,10 @@ def main():
                         gs.make_move(move)
                         move_made = True
                     # print(gs.board)
-                    square_selected = ()
-                    player_clicks = []
+                        square_selected = ()
+                        player_clicks = []
+                    else:
+                        player_clicks = [square_selected]
             elif e.type == p.KEYDOWN:
                 if e.key == p.K_z: # undo when the key 'z' is pressed
                     gs.undo_move()
@@ -66,8 +68,6 @@ def main():
 
         if move_made:
             valid_moves = gs.get_valid_moves()
-            for move in valid_moves:
-                print(move)
             move_made = False
             
         draw_game_state(screen, gs)
