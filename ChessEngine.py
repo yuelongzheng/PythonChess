@@ -156,11 +156,6 @@ class GameState():
                     moves.append(Move((r,c), (end_row, end_col), self.board))
                 elif end_piece[0] == enemy_colour: # opposing chess piece 
                     moves.append(Move((r,c), (end_row, end_col), self.board))
-                    break
-                else : # friendly chess piece
-                    break
-            else:
-                break
     
     # Create a dummy piece for testing purposes
     def get_dummy_moves(self, r, c, moves):
