@@ -218,6 +218,156 @@ class test_rook_movement(unittest.TestCase):
     def test_black_rook_blocked(self):
         self.rook_blocked(False)
 
+class test_knight_movement(unittest.TestCase):
+    def setUp(self):
+        self.gs = GameState()
+        self.gs.board = [
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"]
+        ]
+        self.position = put_piece_at_position()
+        self.prev_row = -1
+        self.prev_col = -1
+        self.rows = len(self.gs.board)
+        self.cols = len(self.gs.board[0])
+        self.length = len(self.gs.board)
+        self.no_of_squares = self.length * self.length
+
+    def knight_movement(self, white):
+        for i in range(0, self.no_of_squares, 1):
+            row = i // 8
+            col = i % 8
+            if white:
+                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "wN", self.gs.board)
+            else:
+                self.gs.white_to_move = False
+                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "bN", self.gs.board)
+            valid_moves = self.gs.get_valid_moves()
+            compare = []
+            directions = ((1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1))
+            for direction in directions:
+                end_row = row + direction[0]
+                end_col = col + direction[1]
+                if 0 <= end_row < self.rows and 0 <= end_col < self.cols:
+                    compare.append(Move((row,col), (end_row, end_col), self.gs.board))
+            self.assertEqual(valid_moves, compare)
+            self.prev_row = row
+            self.prev_col = col
+    
+    def test_white_knight_movement(self):
+        self.knight_movement(True)
+    
+    def test_black_knight_movement(self):
+        self.knight_movement(False)
+    
+class test_bishop_movement(unittest.TestCase):
+    def setUp(self):
+        self.gs = GameState()
+        self.gs.board = [
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"]
+        ]
+        self.position = put_piece_at_position()
+        self.prev_row = -1
+        self.prev_col = -1
+        self.rows = len(self.gs.board)
+        self.cols = len(self.gs.board[0])
+        self.length = len(self.gs.board)
+        self.no_of_squares = self.length * self.length
+
+    def bishop_movement(self, white):
+        for i in range(0, self.no_of_squares, 1):
+            row = i // 8
+            col = i % 8
+            if white:
+                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "wB", self.gs.board)
+            else:
+                self.gs.white_to_move = False
+                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "bB", self.gs.board)
+            valid_moves = self.gs.get_valid_moves()
+            compare = []
+            directions = ((-1, -1), (1, -1), (1, 1), (-1, 1))
+            for direction in directions:
+                for j in range(1, self.length):
+                    end_row = row +  j * direction[0]
+                    end_col = col + j * direction[1]
+                    if 0 <= end_row < self.rows and 0 <= end_col < self.cols:
+                        compare.append(Move((row,col), (end_row, end_col), self.gs.board))
+            self.assertEqual(valid_moves, compare)
+            self.prev_row = row
+            self.prev_col = col
+    
+    def test_white_bishop_movement(self):
+        self.bishop_movement(True)
+    
+    def test_black_bishop_movement(self):
+        self.bishop_movement(False)
+
+    def bishop_takes(self, white):
+        for i in range(0, self.no_of_squares, 1):
+            row = i // 8
+            col = i % 8
+        if white:
+            self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "wB" ,self.gs.board)
+            self.position.surround_piece(row, col, "bp", self.gs.board)
+        else:
+            self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "bB" ,self.gs.board)
+            self.position.surround_piece(row, col, "wp", self.gs.board)
+            self.gs.white_to_move = False
+        valid_moves = self.gs.get_valid_moves()
+        compare = []
+        directions = ((-1, -1), (1, -1), (1, 1), (-1, 1))
+        for direction in directions:
+            end_row = row +  direction[0]
+            end_col = col +  direction[1]
+            if 0 <= end_row < self.rows and 0 <= end_col < self.cols:
+                compare.append(Move((row,col), (end_row, end_col), self.gs.board))
+        self.assertEqual(valid_moves, compare)
+        self.prev_row = row
+        self.prev_col = col
+
+    def test_white_bishop_takes(self):
+        self.bishop_takes(True)
+    
+    def test_black_bishop_takes(self):
+        self.bishop_takes(False)
+    
+    def bishop_blocked(self, white):
+        for i in range(0, self.no_of_squares, 1):
+            row = i // 8
+            col = i % 8
+            if white:
+                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "wB" ,self.gs.board)
+                self.position.surround_piece(row, col, "wD", self.gs.board)
+            else:
+                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "bB" ,self.gs.board)
+                self.position.surround_piece(row, col, "bD", self.gs.board)
+                self.gs.white_to_move = False
+            valid_moves = self.gs.get_valid_moves()
+            compare = []
+            self.assertEqual(valid_moves, compare)
+            self.prev_row = row
+            self.prev_col = col
+
+    def test_white_bishop_blocked(self):
+        self.bishop_blocked(True)
+    
+    def test_black_bishop_blocked(self):
+        self.bishop_blocked(False)
+
+
 if __name__ == '__main__':
     unittest.main()
 
