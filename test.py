@@ -97,12 +97,18 @@ class put_piece_at_position():
         Initally the piece is placed at board[0][0] with prev_row == -1 and prev_col == -1
         Otherwise it takes the piece from board[prev_row][prev_col] and places it at board[row][col]
     '''
-    def put_piece_at_position(self, row, col, prev_row, prev_col, piece, board):
-        if prev_row == -1 and prev_col == -1:
-            board[row][col] = piece
-        else:
-            board[row][col] = board[prev_row][prev_col]
-            board[prev_row][prev_col] = "--"
+    def put_piece_at_position(self, row, col, piece, board):
+        board = [
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"]
+        ]
+        board[row][col] = piece
         return board
     
     def surround_piece_template(self, row, col, piece, board, locations):
@@ -123,11 +129,9 @@ class put_piece_at_position():
         self.surround_piece_template(row, col, piece, board, locations)
 
 class back_rank_movement():
-    def __init__(self, row, col, prev_row, prev_col, piece, movements, limit, gs):
+    def __init__(self, row, col, piece, movements, limit, gs):
         self.row = row
         self.col = col
-        self.prev_row = prev_row
-        self.prev_col = prev_col
         self.piece = piece
         self.movements = movements
         self.limit = limit
@@ -138,10 +142,10 @@ class back_rank_movement():
     
     def movement(self, white):
         if white : 
-            self.position.put_piece_at_position(self.row, self.col, self.prev_row, self.prev_col, "w" + self.piece, self.gs.board)
+            self.gs.board = self.position.put_piece_at_position(self.row, self.col, "w" + self.piece, self.gs.board)
         else:
             self.gs.white_to_move = False
-            self.position.put_piece_at_position(self.row, self.col, self.prev_row, self.prev_col, "b" + self.piece, self.gs.board)
+            self.gs.board = self.position.put_piece_at_position(self.row, self.col, "b" + self.piece, self.gs.board)
         valid_moves = self.gs.get_valid_moves()
         compare = []
         for movement in self.movements:
@@ -154,12 +158,18 @@ class back_rank_movement():
     
     def takes(self, white):
         if white : 
-            self.position.put_piece_at_position(self.row, self.col, self.prev_row, self.prev_col, "w" + self.piece, self.gs.board)
-            self.position.surround_piece(self.row, self.col, "bp", self.gs.board)
+            self.gs.board = self.position.put_piece_at_position(self.row, self.col, "w" + self.piece, self.gs.board)
+            if self.piece == 'N':
+                self.position.suround_knight(self.row, self.col, "bp", self.gs.board)
+            else:
+                self.position.surround_piece(self.row, self.col, "bp", self.gs.board)
         else:
             self.gs.white_to_move = False
-            self.position.put_piece_at_position(self.row, self.col, self.prev_row, self.prev_col, "b" + self.piece, self.gs.board)
-            self.position.surround_piece(self.row, self.col, "wp", self.gs.board)
+            self.gs.board = self.position.put_piece_at_position(self.row, self.col, "b" + self.piece, self.gs.board)
+            if self.piece == 'N':
+                self.position.suround_knight(self.row, self.col, "wp", self.gs.board)
+            else:
+                self.position.surround_piece(self.row, self.col, "wp", self.gs.board)
         valid_moves = self.gs.get_valid_moves()
         compare = []
         for movement in self.movements:
@@ -171,12 +181,18 @@ class back_rank_movement():
 
     def blocked(self, white):
         if white : 
-            self.position.put_piece_at_position(self.row, self.col, self.prev_row, self.prev_col, "w" + self.piece, self.gs.board)
-            self.position.surround_piece(self.row, self.col, "wD", self.gs.board)
+            self.gs.board = self.position.put_piece_at_position(self.row, self.col, "w" + self.piece, self.gs.board)
+            if self.piece == 'N':
+                self.position.suround_knight(self.row, self.col, "wD", self.gs.board)
+            else:
+                self.position.surround_piece(self.row, self.col, "wD", self.gs.board)
         else:
             self.gs.white_to_move = False
-            self.position.put_piece_at_position(self.row, self.col, self.prev_row, self.prev_col, "b" + self.piece, self.gs.board)
-            self.position.surround_piece(self.row, self.col, "bD", self.gs.board)
+            self.gs.board = self.position.put_piece_at_position(self.row, self.col, "b" + self.piece, self.gs.board)
+            if self.piece == 'N':
+                self.position.suround_knight(self.row, self.col, "bD", self.gs.board)
+            else:
+                self.position.surround_piece(self.row, self.col, "bD", self.gs.board)
         valid_moves = self.gs.get_valid_moves()
         compare = []
         return valid_moves, compare
@@ -195,8 +211,6 @@ class test_rook_movement(unittest.TestCase):
             ["--", "--", "--", "--", "--", "--", "--", "--"]
         ]
         self.position = put_piece_at_position()
-        self.prev_row = -1
-        self.prev_col = -1
         self.rows = len(self.gs.board)
         self.cols = len(self.gs.board[0])
         self.length = len(self.gs.board)
@@ -204,14 +218,12 @@ class test_rook_movement(unittest.TestCase):
         self.movements = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
     def rook_movement(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            rook_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'R', self.movements, self.length, self.gs)
+            rook_movement = back_rank_movement(row, col, 'R', self.movements, self.length, self.gs)
             valid_moves, compare = rook_movement.movement(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
 
     def test_white_rook_movement(self):
         self.rook_movement(True)
@@ -223,11 +235,9 @@ class test_rook_movement(unittest.TestCase):
         for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            rook_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'R', self.movements, self.length, self.gs)
+            rook_movement = back_rank_movement(row, col, 'R', self.movements, self.length, self.gs)
             valid_moves, compare = rook_movement.takes(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_rook_takes(self):
         self.rook_takes(True)
@@ -239,11 +249,9 @@ class test_rook_movement(unittest.TestCase):
         for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            rook_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'R', self.movements, self.length, self.gs)
+            rook_movement = back_rank_movement(row, col, 'R', self.movements, self.length, self.gs)
             valid_moves, compare = rook_movement.blocked(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_rook_blocked(self):
         self.rook_blocked(True)
@@ -265,33 +273,20 @@ class test_knight_movement(unittest.TestCase):
             ["--", "--", "--", "--", "--", "--", "--", "--"]
         ]
         self.position = put_piece_at_position()
-        self.prev_row = -1
-        self.prev_col = -1
         self.rows = len(self.gs.board)
         self.cols = len(self.gs.board[0])
         self.length = len(self.gs.board)
         self.no_of_squares = self.length * self.length
+        self.movements = ((1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1))
+        self.limit = 2
 
     def knight_movement(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            if white:
-                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "wN", self.gs.board)
-            else:
-                self.gs.white_to_move = False
-                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "bN", self.gs.board)
-            valid_moves = self.gs.get_valid_moves()
-            compare = []
-            directions = ((1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1))
-            for direction in directions:
-                end_row = row + direction[0]
-                end_col = col + direction[1]
-                if 0 <= end_row < self.rows and 0 <= end_col < self.cols:
-                    compare.append(Move((row,col), (end_row, end_col), self.gs.board))
+            knight_movement = back_rank_movement(row, col, 'N', self.movements, self.limit, self.gs)
+            valid_moves, compare = knight_movement.movement(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_knight_movement(self):
         self.knight_movement(True)
@@ -300,28 +295,12 @@ class test_knight_movement(unittest.TestCase):
         self.knight_movement(False)
     
     def knight_takes(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            if white:
-                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "wN", self.gs.board)
-                self.position.suround_knight(row, col, "bp", self.gs.board)
-            else:
-                self.gs.white_to_move = False
-                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "bN", self.gs.board)
-                self.position.suround_knight(row, col, "wp", self.gs.board)
-            valid_moves = self.gs.get_valid_moves()
-            compare = []
-            directions = ((1, 2), (1, -2), (-1, 2), (-1, -2), (2, 1), (2, -1), (-2, 1), (-2, -1))
-            for direction in directions:
-                end_row = row + direction[0]
-                end_col = col + direction[1]
-                if 0 <= end_row < self.rows and 0 <= end_col < self.cols:
-                    compare.append(Move((row,col), (end_row, end_col), self.gs.board))
-            print(self.gs.board)
+            knight_movement = back_rank_movement(row, col, 'N', self.movements, self.limit, self.gs)
+            valid_moves, compare = knight_movement.takes(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_knight_takes(self):
         self.knight_takes(True)
@@ -330,21 +309,12 @@ class test_knight_movement(unittest.TestCase):
         self.knight_takes(False)
 
     def knight_blocked(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            if white:
-                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "wN", self.gs.board)
-                self.position.suround_knight(row, col, "wD", self.gs.board)
-            else:
-                self.gs.white_to_move = False
-                self.position.put_piece_at_position(row, col, self.prev_row, self.prev_col, "bN", self.gs.board)
-                self.position.suround_knight(row, col, "bD", self.gs.board)
-            valid_moves = self.gs.get_valid_moves()
-            compare = []
+            knight_movement = back_rank_movement(row, col, 'N', self.movements, self.limit, self.gs)
+            valid_moves, compare = knight_movement.blocked(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_knight_block(self):
         self.knight_blocked(True)
@@ -366,8 +336,6 @@ class test_bishop_movement(unittest.TestCase):
             ["--", "--", "--", "--", "--", "--", "--", "--"]
         ]
         self.position = put_piece_at_position()
-        self.prev_row = -1
-        self.prev_col = -1
         self.rows = len(self.gs.board)
         self.cols = len(self.gs.board[0])
         self.length = len(self.gs.board)
@@ -375,14 +343,12 @@ class test_bishop_movement(unittest.TestCase):
         self.movements = ((-1, -1), (1, -1), (1, 1), (-1, 1))
 
     def bishop_movement(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            bishop_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'B', self.movements, self.length, self.gs)
+            bishop_movement = back_rank_movement(row, col, 'B', self.movements, self.length, self.gs)
             valid_moves, compare = bishop_movement.movement(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_bishop_movement(self):
         self.bishop_movement(True)
@@ -391,14 +357,12 @@ class test_bishop_movement(unittest.TestCase):
         self.bishop_movement(False)
 
     def bishop_takes(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            bishop_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'B', self.movements, self.length, self.gs)
+            bishop_movement = back_rank_movement(row, col, 'B', self.movements, self.length, self.gs)
             valid_moves, compare = bishop_movement.takes(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
 
     def test_white_bishop_takes(self):
         self.bishop_takes(True)
@@ -407,20 +371,80 @@ class test_bishop_movement(unittest.TestCase):
         self.bishop_takes(False)
     
     def bishop_blocked(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            bishop_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'B', self.movements, self.length, self.gs)
+            bishop_movement = back_rank_movement(row, col, 'B', self.movements, self.length, self.gs)
             valid_moves, compare = bishop_movement.blocked(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
 
     def test_white_bishop_blocked(self):
         self.bishop_blocked(True)
     
     def test_black_bishop_blocked(self):
         self.bishop_blocked(False)
+
+class test_queen_movement(unittest.TestCase):
+    def setUp(self):
+        self.gs = GameState()
+        self.gs.board = [
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"], 
+            ["--", "--", "--", "--", "--", "--", "--", "--"],
+            ["--", "--", "--", "--", "--", "--", "--", "--"]
+        ]
+        self.position = put_piece_at_position()
+        self.rows = len(self.gs.board)
+        self.cols = len(self.gs.board[0])
+        self.length = len(self.gs.board)
+        self.no_of_squares = self.length * self.length
+        self.movements = ((-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (1, -1), (1, 1), (-1, 1))
+
+    def queen_movement(self, white):
+        for i in range(0, self.no_of_squares):
+            row = i // 8
+            col = i % 8
+            queen_movement = back_rank_movement(row, col, 'Q', self.movements, self.length, self.gs)
+            valid_moves, compare = queen_movement.movement(white)
+            self.assertEqual(valid_moves, compare)
+
+    def test_white_queen_movement(self):
+        self.queen_movement(True)
+    
+    def test_black_queen_movement(self):
+        self.queen_movement(False)
+
+    def queen_takes(self, white):
+        for i in range(0, self.no_of_squares):
+            row = i // 8
+            col = i % 8
+            queen_movement = back_rank_movement(row, col, 'Q', self.movements, self.length, self.gs)
+            valid_moves, compare = queen_movement.takes(white)
+            self.assertEqual(valid_moves, compare)
+
+    def test_white_queen_takes(self):
+        self.queen_takes(True)
+    
+    def test_black_queen_takes(self):
+        self.queen_takes(False)
+    
+    def queen_blocked(self, white):
+        for i in range(0, self.no_of_squares):
+            row = i // 8
+            col = i % 8
+            queen_movement = back_rank_movement(row, col, 'Q', self.movements, self.length, self.gs)
+            valid_moves, compare = queen_movement.blocked(white)
+            self.assertEqual(valid_moves, compare)
+    
+    def test_white_queen_blocked(self):
+        self.queen_blocked(True)
+    
+    def test_black_queen_blocked(self):
+        self.queen_blocked(False)
 
 class test_king_movement(unittest.TestCase):
     def setUp(self):
@@ -436,8 +460,6 @@ class test_king_movement(unittest.TestCase):
             ["--", "--", "--", "--", "--", "--", "--", "--"]
         ]
         self.position = put_piece_at_position()
-        self.prev_row = -1
-        self.prev_col = -1
         self.rows = len(self.gs.board)
         self.cols = len(self.gs.board[0])
         self.length = len(self.gs.board)
@@ -446,14 +468,12 @@ class test_king_movement(unittest.TestCase):
         self.limit = 2
     
     def king_movement(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            king_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'K', self.movements, self.limit, self.gs)
+            king_movement = back_rank_movement(row, col, 'K', self.movements, self.limit, self.gs)
             valid_moves, compare = king_movement.movement(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_king_movement(self):
         self.king_movement(True)
@@ -462,14 +482,12 @@ class test_king_movement(unittest.TestCase):
         self.king_movement(False)
 
     def king_takes(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            king_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'K', self.movements, self.limit, self.gs)
+            king_movement = back_rank_movement(row, col, 'K', self.movements, self.limit, self.gs)
             valid_moves, compare = king_movement.takes(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
 
     def test_white_king_takes(self):
         self.king_takes(True)
@@ -478,14 +496,12 @@ class test_king_movement(unittest.TestCase):
         self.king_takes(False)
 
     def king_blocked(self, white):
-        for i in range(0, self.no_of_squares, 1):
+        for i in range(0, self.no_of_squares):
             row = i // 8
             col = i % 8
-            king_movement = back_rank_movement(row, col, self.prev_row, self.prev_col, 'K', self.movements, self.limit, self.gs)
+            king_movement = back_rank_movement(row, col, 'K', self.movements, self.limit, self.gs)
             valid_moves, compare = king_movement.blocked(white)
             self.assertEqual(valid_moves, compare)
-            self.prev_row = row
-            self.prev_col = col
     
     def test_white_king_blocked(self):
         self.king_blocked(True)
